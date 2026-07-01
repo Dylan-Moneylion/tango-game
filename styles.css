@@ -282,6 +282,9 @@ body {
 .banner {
   position: absolute;
   bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
   background: var(--ink);
   color: #fff;
   padding: 8px 16px;
@@ -290,10 +293,12 @@ body {
   font-weight: 600;
   box-shadow: var(--shadow);
   animation: pop .2s ease;
+  pointer-events: none;
+  white-space: nowrap;
 }
 .banner.good { background: var(--good); }
 .banner.bad { background: var(--err); }
-@keyframes pop { from { transform: translateY(6px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes pop { from { transform: translate(-50%, 6px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 
 /* ---------- toolbar ---------- */
 .toolbar {
