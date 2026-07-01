@@ -1,4 +1,4 @@
-# Tango
+# Tango - dylan
 
 [![Play now](https://img.shields.io/badge/Play-live%20demo-6366f1)](https://dylan-moneylion.github.io/tango-game/)
 [![Validate levels](https://github.com/Dylan-Moneylion/tango-game/actions/workflows/validate.yml/badge.svg)](https://github.com/Dylan-Moneylion/tango-game/actions/workflows/validate.yml)
