@@ -43,6 +43,7 @@
     modalTitle: document.getElementById("modalTitle"),
     closeModal: document.getElementById("closeModal"),
     helpBtn: document.getElementById("helpBtn"),
+    validateBtn: document.getElementById("validateBtn"),
     helpModal: document.getElementById("helpModal"),
     closeHelp: document.getElementById("closeHelp"),
     winModal: document.getElementById("winModal"),
@@ -68,6 +69,7 @@
     won: false,
     bannerTimer: null,
     errorTimer: null,
+    validate: localStorage.getItem("tango-validate-v1") !== "0",
   };
 
   // ---------- persistence ----------
@@ -100,6 +102,7 @@
     }
     buildBoardShell();
     wireEvents();
+    applyValidateUI();
     state.diff = "easy";
     loadLevel(clampIndex(progress.easy.last || 0));
     window.addEventListener("resize", positionConstraints);
@@ -292,11 +295,28 @@
   function refreshErrorDisplay() {
     cancelErrorDisplay();
     clearErrorStyles();
+    if (!state.validate) return; // validation hidden (hard mode)
     if (!hasErrors(computeErrors())) return;
     state.errorTimer = setTimeout(() => {
       state.errorTimer = null;
       applyErrorStyles(computeErrors());
     }, ERROR_DELAY);
+  }
+
+  function applyValidateUI() {
+    const on = state.validate;
+    el.validateBtn.classList.toggle("off", !on);
+    el.validateBtn.setAttribute("aria-pressed", String(!on));
+    el.validateBtn.title = on ? "Hide validation (harder)" : "Show validation";
+    el.checkBtn.disabled = !on; // no on-demand checking while validation is hidden
+  }
+
+  function toggleValidate() {
+    state.validate = !state.validate;
+    localStorage.setItem("tango-validate-v1", state.validate ? "1" : "0");
+    applyValidateUI();
+    refreshErrorDisplay();
+    showBanner(state.validate ? "Validation shown" : "Validation hidden — good luck!", state.validate ? "good" : "");
   }
 
   function isFull() {
@@ -366,7 +386,7 @@
 
   // ---------- check ----------
   function check() {
-    if (state.won) return;
+    if (state.won || !state.validate) return;
     const errs = computeErrors();
     // The Check button reveals violations right away, bypassing the delay.
     cancelErrorDisplay();
@@ -528,6 +548,7 @@
       loadLevel(Number(b.dataset.i));
     });
 
+    el.validateBtn.addEventListener("click", toggleValidate);
     el.helpBtn.addEventListener("click", () => (el.helpModal.hidden = false));
     el.closeHelp.addEventListener("click", () => (el.helpModal.hidden = true));
 
