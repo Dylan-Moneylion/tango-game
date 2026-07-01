@@ -41,9 +41,14 @@ function countSolutions(given, constraints, limit = 2) {
   return count;
 }
 
+const MIN_PER_DIFFICULTY = Number(process.env.MIN_PER_DIFFICULTY || 500);
 const data = JSON.parse(fs.readFileSync("levels.json", "utf8"));
 let errors = 0, total = 0;
 for (const diff of ["easy", "medium", "hard"]) {
+  if (!Array.isArray(data[diff]) || data[diff].length < MIN_PER_DIFFICULTY) {
+    console.log(`${diff}: expected >= ${MIN_PER_DIFFICULTY} levels, found ${data[diff] ? data[diff].length : 0}`);
+    errors++;
+  }
   for (const lvl of data[diff]) {
     total++;
     // solution valid
@@ -65,3 +70,4 @@ for (const diff of ["easy", "medium", "hard"]) {
   }
 }
 console.log(`Validated ${total} puzzles, ${errors} errors.`);
+if (errors > 0) process.exit(1);

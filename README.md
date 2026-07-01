@@ -1,6 +1,11 @@
 # Tango
 
+[![Play now](https://img.shields.io/badge/Play-live%20demo-6366f1)](https://dylan-moneylion.github.io/tango-game/)
+[![Validate levels](https://github.com/Dylan-Moneylion/tango-game/actions/workflows/validate.yml/badge.svg)](https://github.com/Dylan-Moneylion/tango-game/actions/workflows/validate.yml)
+
 A clone of the LinkedIn puzzle game **Tango**, with **no daily limit** and **500 hand-verified levels each** of Easy, Medium, and Hard (1,500 total). Instead of suns and moons it uses **red triangles** and **blue circles**.
+
+**▶ Play it now: https://dylan-moneylion.github.io/tango-game/**
 
 Runs as a **mobile-friendly web app** and as a **native iOS app** (see [`ios/`](ios/README.md)) that bundles the whole game for offline play.
 
@@ -49,8 +54,10 @@ npx serve .
 
 ```bash
 node generate-levels.js 500      # 500 puzzles per difficulty
-node validate-levels.js          # sanity-check uniqueness & rules
+node validate-levels.js          # sanity-check uniqueness & rules (exits non-zero on failure)
 ```
+
+Every push and pull request runs `validate-levels.js` in GitHub Actions (see [`.github/workflows/validate.yml`](.github/workflows/validate.yml)) to guarantee all levels stay valid and uniquely solvable.
 
 ## iOS app
 
