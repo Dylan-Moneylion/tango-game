@@ -3,7 +3,7 @@
 [![Play now](https://img.shields.io/badge/Play-live%20demo-6366f1)](https://dylan-moneylion.github.io/tango-game/)
 [![Validate levels](https://github.com/Dylan-Moneylion/tango-game/actions/workflows/validate.yml/badge.svg)](https://github.com/Dylan-Moneylion/tango-game/actions/workflows/validate.yml)
 
-A clone of the LinkedIn puzzle game **Tango**, with **no daily limit** and **500 hand-verified levels each** of Easy, Medium, and Hard (1,500 total). Instead of suns and moons it uses **red triangles** and **blue circles**.
+A clone of the LinkedIn puzzle game **Tango**, with **no daily limit** and **1,000 hand-verified levels each** of Easy, Medium, and Hard (3,000 total). Instead of suns and moons it uses **red triangles** and **blue circles**.
 
 **▶ Play it now: https://dylan-moneylion.github.io/tango-game/**
 
@@ -53,7 +53,8 @@ npx serve .
 `levels.json` is produced by a self-contained Node script (no dependencies). It generates a random valid solution, derives constraints, minimizes clues while keeping a **unique** solution, and rates difficulty by the hardest deduction technique required.
 
 ```bash
-node generate-levels.js 500      # 500 puzzles per difficulty
+node generate-levels.js 1000            # 1000 puzzles per difficulty (fresh)
+node generate-levels.js 500 --append    # keep existing bank and add 500 more per difficulty
 node validate-levels.js          # sanity-check uniqueness & rules (exits non-zero on failure)
 ```
 

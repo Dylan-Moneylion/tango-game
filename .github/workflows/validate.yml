@@ -22,3 +22,5 @@ jobs:
 
       - name: Validate every level is valid and uniquely solvable
         run: node validate-levels.js
+        env:
+          MIN_PER_DIFFICULTY: 1000

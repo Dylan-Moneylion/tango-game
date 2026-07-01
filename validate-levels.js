@@ -44,10 +44,19 @@ function countSolutions(given, constraints, limit = 2) {
 const MIN_PER_DIFFICULTY = Number(process.env.MIN_PER_DIFFICULTY || 500);
 const data = JSON.parse(fs.readFileSync("levels.json", "utf8"));
 let errors = 0, total = 0;
+const globalSigs = new Map(); // puzzle signature -> "diff #id" (uniqueness across ALL levels)
 for (const diff of ["easy", "medium", "hard"]) {
   if (!Array.isArray(data[diff]) || data[diff].length < MIN_PER_DIFFICULTY) {
     console.log(`${diff}: expected >= ${MIN_PER_DIFFICULTY} levels, found ${data[diff] ? data[diff].length : 0}`);
     errors++;
+  }
+  const ids = new Set();
+  for (const lvl of data[diff]) {
+    if (ids.has(lvl.id)) { console.log(`${diff} #${lvl.id}: duplicate id`); errors++; }
+    ids.add(lvl.id);
+    const sig = lvl.given + "|" + lvl.constraints.map((c) => c.join(",")).join(";");
+    if (globalSigs.has(sig)) { console.log(`${diff} #${lvl.id}: duplicate puzzle (same as ${globalSigs.get(sig)})`); errors++; }
+    else globalSigs.set(sig, `${diff} #${lvl.id}`);
   }
   for (const lvl of data[diff]) {
     total++;

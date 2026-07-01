@@ -1,6 +1,6 @@
 # Tango — iOS app
 
-A native iOS wrapper around the Tango web game. The full game (all 1,500 levels)
+A native iOS wrapper around the Tango web game. The full game (all 3,000 levels)
 is **bundled inside the app**, so it runs completely offline — no server, no
 network. A SwiftUI `App` hosts a `WKWebView` that serves the bundled web assets
 through a custom URL scheme (so `fetch()` and `localStorage` work like on the web).

@@ -426,6 +426,12 @@ function encode(puzzle, id) {
 }
 
 // ---------- main ----------
+// Usage:
+//   node generate-levels.js <n>              generate <n> levels/difficulty from scratch
+//   node generate-levels.js <n> --append     keep existing levels.json and add <n> more/difficulty
+const APPEND = process.argv.includes("--append");
+const signature = (enc) => enc.given + "|" + enc.constraints.map((c) => c.join(",")).join(";");
+
 const targets = [
   ["easy", 0],
   ["medium", 1],
@@ -434,21 +440,33 @@ const targets = [
 const out = { easy: [], medium: [], hard: [] };
 const seen = { easy: new Set(), medium: new Set(), hard: new Set() };
 
+if (APPEND) {
+  const prev = JSON.parse(fs.readFileSync("levels.json", "utf8"));
+  for (const [name] of targets) {
+    out[name] = prev[name].slice();
+    for (const lvl of prev[name]) seen[name].add(signature(lvl));
+  }
+  console.log(
+    `Appending ${PER_DIFFICULTY} to existing (easy=${out.easy.length}, medium=${out.medium.length}, hard=${out.hard.length}).`
+  );
+}
+
 const start = Date.now();
 for (const [name, tier] of targets) {
+  const target = out[name].length + PER_DIFFICULTY;
   let attempts = 0;
-  while (out[name].length < PER_DIFFICULTY) {
+  while (out[name].length < target) {
     attempts++;
     const p = buildPuzzle(tier);
     if (!p) continue;
     const enc = encode(p, out[name].length + 1);
-    const sig = enc.given + "|" + enc.constraints.map((c) => c.join(",")).join(";");
+    const sig = signature(enc);
     if (seen[name].has(sig)) continue;
     seen[name].add(sig);
     out[name].push(enc);
     if (out[name].length % 50 === 0) {
       process.stdout.write(
-        `  ${name}: ${out[name].length}/${PER_DIFFICULTY} (attempts ${attempts}, ${((Date.now() - start) / 1000).toFixed(1)}s)\n`
+        `  ${name}: ${out[name].length}/${target} (attempts ${attempts}, ${((Date.now() - start) / 1000).toFixed(1)}s)\n`
       );
     }
   }
