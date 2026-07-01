@@ -70,4 +70,4 @@ A ready-to-open Xcode project lives in [`ios/`](ios/README.md). Open `ios/Tango.
 - `levels.json` — generated puzzle bank (`{ easy, medium, hard }`).
 - `generate-levels.js` — puzzle generator + solver + difficulty rater.
 - `validate-levels.js` — verifies every level is valid and uniquely solvable.
-- `ios/` — native iOS app (SwiftUI + `WKWebView`) bundling the game.
+- `ios/` — native iOS app (SwiftUI + `WKWebView`) bundling the game. 
