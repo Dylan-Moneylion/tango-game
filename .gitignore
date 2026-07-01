@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Editor / build
+.vscode/
+*.log
+
+# Xcode
+ios/build/
+ios/DerivedData/
+xcuserdata/
+*.xcuserstate
