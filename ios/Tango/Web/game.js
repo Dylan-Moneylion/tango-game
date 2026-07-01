@@ -8,6 +8,7 @@
   const TRIANGLE = 1; // red triangle
   const DIFFS = ["easy", "medium", "hard"];
   const STORE_KEY = "tango-progress-v1";
+  const ERROR_DELAY = 2000; // ms of inactivity before rule violations are highlighted
 
   // lines: 6 rows then 6 cols
   const LINES = [];
@@ -66,6 +67,7 @@
     timerId: null,
     won: false,
     bannerTimer: null,
+    errorTimer: null,
   };
 
   // ---------- persistence ----------
@@ -197,7 +199,7 @@
         cell.appendChild(s);
       }
     }
-    evaluate();
+    refreshErrorDisplay();
   }
 
   // ---------- interaction ----------
@@ -229,8 +231,11 @@
   }
 
   // ---------- evaluation / errors ----------
-  function evaluate() {
+  // Detects rule violations without touching the DOM. Returns offending cell
+  // indices and the indices of violated constraint badges.
+  function computeErrors() {
     const errCells = new Set();
+    const badCons = new Set();
     for (const line of LINES) {
       const counts = [0, 0];
       for (const i of line) if (state.grid[i] !== EMPTY) counts[state.grid[i]]++;
@@ -247,27 +252,51 @@
         }
       }
     }
-    state.consEls.forEach((node) => {
+    state.consEls.forEach((node, idx) => {
       const a = Number(node.dataset.a);
       const b = Number(node.dataset.b);
       const t = Number(node.dataset.t);
       const va = state.grid[a];
       const vb = state.grid[b];
-      let bad = false;
-      if (va !== EMPTY && vb !== EMPTY) {
-        if (t === 0 && va !== vb) bad = true;
-        if (t === 1 && va === vb) bad = true;
-      }
-      node.classList.toggle("bad", bad);
-      if (bad) {
+      if (va !== EMPTY && vb !== EMPTY && ((t === 0 && va !== vb) || (t === 1 && va === vb))) {
+        badCons.add(idx);
         errCells.add(a);
         errCells.add(b);
       }
     });
-    for (let i = 0; i < CELLS; i++) {
-      state.cellEls[i].classList.toggle("error", errCells.has(i));
-    }
-    return errCells;
+    return { errCells, badCons };
+  }
+
+  function hasErrors(errs) {
+    return errs.errCells.size > 0 || errs.badCons.size > 0;
+  }
+
+  function applyErrorStyles(errs) {
+    state.consEls.forEach((node, idx) => node.classList.toggle("bad", errs.badCons.has(idx)));
+    for (let i = 0; i < CELLS; i++) state.cellEls[i].classList.toggle("error", errs.errCells.has(i));
+  }
+
+  function clearErrorStyles() {
+    state.consEls.forEach((node) => node.classList.remove("bad"));
+    for (let i = 0; i < CELLS; i++) state.cellEls[i].classList.remove("error");
+  }
+
+  function cancelErrorDisplay() {
+    if (state.errorTimer) clearTimeout(state.errorTimer);
+    state.errorTimer = null;
+  }
+
+  // Violations are only highlighted after ERROR_DELAY ms with no further edits.
+  // Any change hides current highlights and restarts the timer; clearing all
+  // errors removes the highlight immediately.
+  function refreshErrorDisplay() {
+    cancelErrorDisplay();
+    clearErrorStyles();
+    if (!hasErrors(computeErrors())) return;
+    state.errorTimer = setTimeout(() => {
+      state.errorTimer = null;
+      applyErrorStyles(computeErrors());
+    }, ERROR_DELAY);
   }
 
   function isFull() {
@@ -277,8 +306,7 @@
 
   function checkWin() {
     if (!isFull()) return false;
-    const errs = evaluate();
-    if (errs.size === 0) {
+    if (!hasErrors(computeErrors())) {
       onWin();
       return true;
     }
@@ -289,6 +317,8 @@
   function onWin() {
     state.won = true;
     stopTimer();
+    cancelErrorDisplay();
+    clearErrorStyles();
     const set = solvedSet(state.diff);
     set.add(state.level.id);
     progress[state.diff].solved = [...set];
@@ -337,8 +367,11 @@
   // ---------- check ----------
   function check() {
     if (state.won) return;
-    const errs = evaluate();
-    if (errs.size > 0) showBanner("Some cells break the rules.", "bad");
+    const errs = computeErrors();
+    // The Check button reveals violations right away, bypassing the delay.
+    cancelErrorDisplay();
+    applyErrorStyles(errs);
+    if (hasErrors(errs)) showBanner("Some cells break the rules.", "bad");
     else if (!isFull()) showBanner("So far so good — keep going!", "good");
     else checkWin();
   }
